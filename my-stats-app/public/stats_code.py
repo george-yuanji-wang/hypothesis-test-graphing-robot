@@ -221,7 +221,7 @@ def plot_test_distribution(
         # H₀ annotation, axis, etc.
         ax_graph.text(0, norm.pdf(0)*0.5, r"$H_0$", fontsize=14, ha='center', va='center', color=DARK_GRAY)
         ax_graph.set_xlabel(f"${stat_label}$", color=DARK_GRAY)
-        ax_graph.set_ylabel("$P$", color=DARK_GRAY)
+        ax_graph.set_ylabel("$Probability$", color=DARK_GRAY)
         ax_graph.set_title(test_name, color=DARK_GRAY)
         ax_graph.set_xlim(x_min, x_max)
         ax_graph.set_ylim(0, norm.pdf(0)*1.35)
@@ -316,11 +316,11 @@ def plot_test_distribution(
         )
 
         # p-value
-        ax_graph.plot([], [], ' ', label=f"$p = {format_scientific_latex(p_value)}$")
+        ax_graph.plot([], [], ' ', label=f"$p-value = {format_scientific_latex(p_value)}$")
         ax_graph.text(0, t.pdf(0, df)*0.5, r"$H_0$", fontsize=14, ha='center', va='center', color=DARK_GRAY)
 
         ax_graph.set_xlabel(f"${stat_label}$", color=DARK_GRAY)
-        ax_graph.set_ylabel("$P$", color=DARK_GRAY)
+        ax_graph.set_ylabel("$Probability$", color=DARK_GRAY)
         ax_graph.set_title(test_name, color=DARK_GRAY)
         ax_graph.set_xlim(x_min, x_max)
         ax_graph.set_ylim(0, t.pdf(0, df)*1.35)
