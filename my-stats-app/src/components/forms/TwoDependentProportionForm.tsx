@@ -1,9 +1,16 @@
-// src/components/forms/TwoDependentProportionForm.tsx
 import React, { useState } from "react";
 import { runTestFunction } from "../../pyodideLoader";
 
 export default function TwoDependentProportionForm() {
-  const defaultValues = { n10: 12, n01: 6, n11: 20, n00: 25, alpha: 0.05, tailType: 2 };
+  const defaultValues = { 
+    n10: 12, 
+    n01: 6, 
+    n11: 20, 
+    n00: 25, 
+    alpha: 0.05, 
+    tailType: 2 // default to Right-tailed
+  };
+
   const [n10, setN10] = useState<number>(defaultValues.n10);
   const [n01, setN01] = useState<number>(defaultValues.n01);
   const [n11, setN11] = useState<number>(defaultValues.n11);
@@ -49,6 +56,7 @@ export default function TwoDependentProportionForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 p-4">
+      {/* n₁₀ */}
       <div className="flex flex-col">
         <label className="mb-1">n₁₀:</label>
         <input
@@ -58,6 +66,7 @@ export default function TwoDependentProportionForm() {
           className="bg-gray-800 text-white rounded px-2 py-1"
         />
       </div>
+      {/* n₀₁ */}
       <div className="flex flex-col">
         <label className="mb-1">n₀₁:</label>
         <input
@@ -67,6 +76,7 @@ export default function TwoDependentProportionForm() {
           className="bg-gray-800 text-white rounded px-2 py-1"
         />
       </div>
+      {/* n₁₁ */}
       <div className="flex flex-col">
         <label className="mb-1">n₁₁:</label>
         <input
@@ -76,6 +86,7 @@ export default function TwoDependentProportionForm() {
           className="bg-gray-800 text-white rounded px-2 py-1"
         />
       </div>
+      {/* n₀₀ */}
       <div className="flex flex-col">
         <label className="mb-1">n₀₀:</label>
         <input
@@ -85,6 +96,7 @@ export default function TwoDependentProportionForm() {
           className="bg-gray-800 text-white rounded px-2 py-1"
         />
       </div>
+      {/* α */}
       <div className="flex flex-col">
         <label className="mb-1">α:</label>
         <input
@@ -95,15 +107,26 @@ export default function TwoDependentProportionForm() {
           className="bg-gray-800 text-white rounded px-2 py-1"
         />
       </div>
+      {/* Tail Type Dropdown */}
       <div className="flex flex-col">
-        <label className="mb-1">tailType (typically 2):</label>
-        <input
-          type="number"
+        <label className="mb-1">Tail Type:</label>
+        <select
           value={tailType}
           onChange={(e) => setTailType(Number(e.target.value))}
           className="bg-gray-800 text-white rounded px-2 py-1"
-        />
+        >
+          <option value={1}>
+            Left-tailed (H₁: Δp &lt; 0)
+          </option>
+          <option value={2}>
+            Right-tailed (H₁: Δp &gt; 0)
+          </option>
+          <option value={3}>
+            Two-tailed (H₁: Δp &ne; 0)
+          </option>
+        </select>
       </div>
+      {/* Buttons */}
       <div className="flex flex-col space-y-2">
         <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">
           Solve &amp; Graph
@@ -112,6 +135,7 @@ export default function TwoDependentProportionForm() {
           Clear Form
         </button>
       </div>
+      {/* Image Output and Download */}
       {imgB64 && (
         <div className="mt-4">
           <img src={`data:image/png;base64,${imgB64}`} alt="Plot" className="border border-white" />
