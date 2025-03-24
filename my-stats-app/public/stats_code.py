@@ -216,7 +216,7 @@ def plot_test_distribution(
         )
 
         # p-value
-        ax_graph.plot([], [], ' ', label=f"$p = {format_scientific_latex(p_value)}$")
+        ax_graph.plot([], [], ' ', label=f"$p-value = {format_scientific_latex(p_value)}$")
 
         # H₀ annotation, axis, etc.
         ax_graph.text(0, norm.pdf(0)*0.5, r"$H_0$", fontsize=14, ha='center', va='center', color=DARK_GRAY)
