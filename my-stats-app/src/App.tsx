@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import LoadingScreen from "./LoadingScreen";
 import MainContent from "./MainContent";
 import { initPyodide } from "./pyodideLoader";
+import { Analytics } from "@vercel/analytics/react"
 import "./App.css";
 export default function App() {
   const [pyReady, setPyReady] = useState(false);
@@ -15,5 +16,10 @@ export default function App() {
     return <LoadingScreen />;
   }
 
-  return <MainContent />;
+  return (
+    <div>
+      <MainContent />
+      <Analytics />
+    </div>
+  );
 }
