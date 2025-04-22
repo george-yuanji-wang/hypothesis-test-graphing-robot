@@ -1,17 +1,15 @@
+// src/components/forms/OneSampleProportionZForm.tsx
 import React, { useState } from "react";
 import { runTestFunction } from "../../pyodideLoader";
+import { Button } from "@/components/ui/button";
 
 export default function OneSampleProportionZForm() {
-  // In this scheme:
-  //   1 = Left-tailed (H₀: p ≥ p₀, H₁: p < p₀)
-  //   2 = Right-tailed (H₀: p ≤ p₀, H₁: p > p₀)
-  //   3 = Two-tailed (H₀: p = p₀, H₁: p ≠ p₀)
   const defaultValues = {
-    n: 100,
-    pHat: 0.55,
-    p: 0.5,
+    n: 150,
+    pHat: 0.60,
+    p: 0.50,
     alpha: 0.05,
-    tailType: 1, // default to Left-tailed
+    tailType: 3, // default to Two-tailed
   };
 
   const [n, setN] = useState<number>(defaultValues.n);
@@ -23,19 +21,14 @@ export default function OneSampleProportionZForm() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    try {
-      // tailType is already numeric (1, 2, or 3).
-      const base64 = await runTestFunction("one_sample_proportion_z_test", {
-        n,
-        p_hat: pHat,
-        p,
-        alpha,
-        tail_type: tailType,
-      });
-      setImgB64(base64);
-    } catch (error) {
-      console.error("Error generating plot:", error);
-    }
+    const base64 = await runTestFunction("one_sample_proportion_z_test", {
+      n,
+      p_hat: pHat,
+      p,
+      alpha,
+      tail_type: tailType,
+    });
+    setImgB64(base64);
   }
 
   function handleClear() {
@@ -80,9 +73,9 @@ export default function OneSampleProportionZForm() {
         />
       </div>
 
-      {/* p */}
+      {/* p₀ */}
       <div className="flex flex-col">
-        <label className="mb-1">p:</label>
+        <label className="mb-1">p₀:</label>
         <input
           type="number"
           step="0.01"
@@ -94,7 +87,7 @@ export default function OneSampleProportionZForm() {
 
       {/* α */}
       <div className="flex flex-col">
-        <label className="mb-1">α (significance level):</label>
+        <label className="mb-1">α:</label>
         <input
           type="number"
           step="0.001"
@@ -104,58 +97,37 @@ export default function OneSampleProportionZForm() {
         />
       </div>
 
-      {/* Tail Type Dropdown */}
+      {/* Tail Type */}
       <div className="flex flex-col">
         <label className="mb-1">Tail Type:</label>
         <select
           value={tailType}
-          onChange={(e) => setTailType(parseInt(e.target.value, 10))}
+          onChange={(e) => setTailType(Number(e.target.value))}
           className="bg-gray-800 text-white rounded px-2 py-1"
         >
-          <option value={1}>
-            Left-tailed (H₁: p &lt; p₀)
-          </option>
-          <option value={2}>
-            Right-tailed (H₁: p &gt; p₀)
-          </option>
-          <option value={3}>
-            Two-tailed (H₁: p ≠ p₀)
-          </option>
+          <option value={1}>Left-tailed (H₁: p &lt; p₀)</option>
+          <option value={2}>Right-tailed (H₁: p &gt; p₀)</option>
+          <option value={3}>Two-tailed (H₁: p ≠ p₀)</option>
         </select>
       </div>
 
-      {/* Submit & Clear Buttons */}
+      {/* Buttons */}
       <div className="flex flex-col space-y-2">
-        <button
-          type="submit"
-          className="bg-blue-600 text-white px-4 py-2 rounded"
-        >
-          Solve &amp; Graph
-        </button>
-        <button
-          type="button"
-          onClick={handleClear}
-          className="bg-gray-600 text-white px-4 py-2 rounded"
-        >
-          Clear Form
-        </button>
+        <Button type="submit">Solve &amp; Graph</Button>
+        <Button variant="outline" onClick={handleClear}>Clear Form</Button>
       </div>
 
-      {/* Plot Output & Download Button */}
+      {/* Plot & Download */}
       {imgB64 && (
         <div className="mt-4">
           <img
             src={`data:image/png;base64,${imgB64}`}
-            alt="Plot"
-            className="border border-white"
+            alt="Proportion Z-Test Plot"
+            className="rounded"
           />
-          <button
-            type="button"
-            onClick={handleDownload}
-            className="bg-green-600 text-white px-4 py-2 rounded mt-2"
-          >
+          <Button onClick={handleDownload} className="mt-2">
             Download Image
-          </button>
+          </Button>
         </div>
       )}
     </form>

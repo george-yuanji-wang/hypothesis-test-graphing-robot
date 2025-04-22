@@ -1,8 +1,17 @@
+// src/components/forms/TwoDependentTForm.tsx
 import React, { useState } from "react";
 import { runTestFunction } from "../../pyodideLoader";
+import { Button } from "@/components/ui/button";
 
 export default function TwoDependentTForm() {
-  const defaultValues = { n: 15, s_d: 2.5, dBar: -1.0, alpha: 0.05, tailType: 2 };
+  const defaultValues = {
+    n: 20,          // number of pairs
+    s_d: 1.8,       // sd of differences
+    dBar: 1,      // mean of differences
+    alpha: 0.05,    // significance level
+    tailType: 3,    // default to Two‑tailed
+  };
+
   const [n, setN] = useState<number>(defaultValues.n);
   const [s_d, setSD] = useState<number>(defaultValues.s_d);
   const [dBar, setDBar] = useState<number>(defaultValues.dBar);
@@ -12,18 +21,14 @@ export default function TwoDependentTForm() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    try {
-      const base64 = await runTestFunction("two_dependent_t_test", {
-        n,
-        s_d,
-        d_bar: dBar,
-        alpha,
-        tail_type: tailType,
-      });
-      setImgB64(base64);
-    } catch (error) {
-      console.error("Error generating plot:", error);
-    }
+    const base64 = await runTestFunction("two_dependent_t_test", {
+      n,
+      s_d,
+      d_bar: dBar,
+      alpha,
+      tail_type: tailType,
+    });
+    setImgB64(base64);
   }
 
   function handleClear() {
@@ -55,10 +60,10 @@ export default function TwoDependentTForm() {
           className="bg-gray-800 text-white rounded px-2 py-1"
         />
       </div>
-      
-      {/* s_d */}
+
+      {/* sₙ (SD of paired differences) */}
       <div className="flex flex-col">
-        <label className="mb-1">s_d:</label>
+        <label className="mb-1">s_d (SD of differences):</label>
         <input
           type="number"
           step="0.01"
@@ -67,10 +72,10 @@ export default function TwoDependentTForm() {
           className="bg-gray-800 text-white rounded px-2 py-1"
         />
       </div>
-      
+
       {/* d̄ */}
       <div className="flex flex-col">
-        <label className="mb-1">d̄:</label>
+        <label className="mb-1">d̄ (mean difference):</label>
         <input
           type="number"
           step="0.01"
@@ -79,7 +84,7 @@ export default function TwoDependentTForm() {
           className="bg-gray-800 text-white rounded px-2 py-1"
         />
       </div>
-      
+
       {/* α */}
       <div className="flex flex-col">
         <label className="mb-1">α:</label>
@@ -91,8 +96,8 @@ export default function TwoDependentTForm() {
           className="bg-gray-800 text-white rounded px-2 py-1"
         />
       </div>
-      
-      {/* Tail Type Dropdown */}
+
+      {/* Tail Type */}
       <div className="flex flex-col">
         <label className="mb-1">Tail Type:</label>
         <select
@@ -100,29 +105,29 @@ export default function TwoDependentTForm() {
           onChange={(e) => setTailType(Number(e.target.value))}
           className="bg-gray-800 text-white rounded px-2 py-1"
         >
-          <option value={1}>Left-tailed (H₁: d̄ &lt; 0)</option>
-          <option value={2}>Right-tailed (H₁: d̄ &gt; 0)</option>
-          <option value={3}>Two-tailed (H₁: d̄ &ne; 0)</option>
+          <option value={1}>Left‑tailed (H₁: d̄ &lt; 0)</option>
+          <option value={2}>Right‑tailed (H₁: d̄ &gt; 0)</option>
+          <option value={3}>Two‑tailed (H₁: d̄ ≠ 0)</option>
         </select>
       </div>
-      
-      {/* Form Buttons */}
+
+      {/* Buttons */}
       <div className="flex flex-col space-y-2">
-        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">
-          Solve &amp; Graph
-        </button>
-        <button type="button" onClick={handleClear} className="bg-gray-600 text-white px-4 py-2 rounded">
-          Clear Form
-        </button>
+        <Button type="submit">Solve &amp; Graph</Button>
+        <Button variant="outline" onClick={handleClear}>Clear Form</Button>
       </div>
-      
-      {/* Image Output and Download */}
+
+      {/* Plot & Download */}
       {imgB64 && (
         <div className="mt-4">
-          <img src={`data:image/png;base64,${imgB64}`} alt="Plot" className="border border-white" />
-          <button type="button" onClick={handleDownload} className="bg-green-600 text-white px-4 py-2 rounded mt-2">
+          <img
+            src={`data:image/png;base64,${imgB64}`}
+            alt="Paired T‑Test Plot"
+            className="rounded"
+          />
+          <Button onClick={handleDownload} className="mt-2">
             Download Image
-          </button>
+          </Button>
         </div>
       )}
     </form>

@@ -1,17 +1,20 @@
+// src/components/forms/TwoIndependentTForm.tsx
 import React, { useState } from "react";
 import { runTestFunction } from "../../pyodideLoader";
+import { Button } from "@/components/ui/button";
 
 export default function TwoIndependentTForm() {
-  const defaultValues = { 
-    n1: 25, 
-    n2: 30, 
-    s1: 2.4, 
-    s2: 2.1, 
-    xBar1: 8.2, 
-    xBar2: 9.1, 
-    alpha: 0.05, 
-    tailType: 2 
+  const defaultValues = {
+    n1: 20,
+    n2: 25,
+    s1: 4.2,
+    s2: 4.5,
+    xBar1: 100,
+    xBar2: 103,
+    alpha: 0.05,
+    tailType: 3, // default to Two-tailed
   };
+
   const [n1, setN1] = useState<number>(defaultValues.n1);
   const [n2, setN2] = useState<number>(defaultValues.n2);
   const [s1, setS1] = useState<number>(defaultValues.s1);
@@ -21,9 +24,24 @@ export default function TwoIndependentTForm() {
   const [alpha, setAlpha] = useState<number>(defaultValues.alpha);
   const [tailType, setTailType] = useState<number>(defaultValues.tailType);
   const [imgB64, setImgB64] = useState<string>("");
+  const [error, setError] = useState<string>("");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setError("");
+    if (n1 < 2 || n2 < 2) {
+      setError("Sample sizes must be at least 2.");
+      return;
+    }
+    if (s1 <= 0 || s2 <= 0) {
+      setError("Standard deviations must be positive.");
+      return;
+    }
+    if (alpha <= 0 || alpha >= 1) {
+      setError("Significance level α must be between 0 and 1 (exclusive).");
+      return;
+    }
+
     try {
       const base64 = await runTestFunction("two_independent_t_test", {
         n1,
@@ -36,8 +54,8 @@ export default function TwoIndependentTForm() {
         tail_type: tailType,
       });
       setImgB64(base64);
-    } catch (error) {
-      console.error("Error generating plot:", error);
+    } catch {
+      setError("Unable to generate the two-sample t-test plot.");
     }
   }
 
@@ -51,6 +69,7 @@ export default function TwoIndependentTForm() {
     setAlpha(defaultValues.alpha);
     setTailType(defaultValues.tailType);
     setImgB64("");
+    setError("");
   }
 
   function handleDownload() {
@@ -63,7 +82,10 @@ export default function TwoIndependentTForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 p-4">
-      {/* n₁ */}
+      {error && (
+        <div className="bg-red-100 text-red-800 px-3 py-2 rounded">{error}</div>
+      )}
+
       <div className="flex flex-col">
         <label className="mb-1">n₁:</label>
         <input
@@ -73,7 +95,7 @@ export default function TwoIndependentTForm() {
           className="bg-gray-800 text-white rounded px-2 py-1"
         />
       </div>
-      {/* n₂ */}
+
       <div className="flex flex-col">
         <label className="mb-1">n₂:</label>
         <input
@@ -83,9 +105,9 @@ export default function TwoIndependentTForm() {
           className="bg-gray-800 text-white rounded px-2 py-1"
         />
       </div>
-      {/* s₁ */}
+
       <div className="flex flex-col">
-        <label className="mb-1">s₁:</label>
+        <label className="mb-1">s₁ (SD₁):</label>
         <input
           type="number"
           step="0.01"
@@ -94,9 +116,9 @@ export default function TwoIndependentTForm() {
           className="bg-gray-800 text-white rounded px-2 py-1"
         />
       </div>
-      {/* s₂ */}
+
       <div className="flex flex-col">
-        <label className="mb-1">s₂:</label>
+        <label className="mb-1">s₂ (SD₂):</label>
         <input
           type="number"
           step="0.01"
@@ -105,7 +127,7 @@ export default function TwoIndependentTForm() {
           className="bg-gray-800 text-white rounded px-2 py-1"
         />
       </div>
-      {/* x̄₁ */}
+
       <div className="flex flex-col">
         <label className="mb-1">x̄₁:</label>
         <input
@@ -116,7 +138,7 @@ export default function TwoIndependentTForm() {
           className="bg-gray-800 text-white rounded px-2 py-1"
         />
       </div>
-      {/* x̄₂ */}
+
       <div className="flex flex-col">
         <label className="mb-1">x̄₂:</label>
         <input
@@ -127,7 +149,7 @@ export default function TwoIndependentTForm() {
           className="bg-gray-800 text-white rounded px-2 py-1"
         />
       </div>
-      {/* α */}
+
       <div className="flex flex-col">
         <label className="mb-1">α:</label>
         <input
@@ -138,7 +160,7 @@ export default function TwoIndependentTForm() {
           className="bg-gray-800 text-white rounded px-2 py-1"
         />
       </div>
-      {/* Tail Type Dropdown */}
+
       <div className="flex flex-col">
         <label className="mb-1">Tail Type:</label>
         <select
@@ -146,39 +168,25 @@ export default function TwoIndependentTForm() {
           onChange={(e) => setTailType(Number(e.target.value))}
           className="bg-gray-800 text-white rounded px-2 py-1"
         >
-          <option value={1}>Left-tailed (H₁: x̄₁ - x̄₂ &lt; 0)</option>
-          <option value={2}>Right-tailed (H₁: x̄₁ - x̄₂ &gt; 0)</option>
-          <option value={3}>Two-tailed (H₁: x̄₁ - x̄₂ &ne; 0)</option>
+          <option value={1}>Left-tailed (H₁: μ₁ − μ₂ &lt; 0)</option>
+          <option value={2}>Right-tailed (H₁: μ₁ − μ₂ &gt; 0)</option>
+          <option value={3}>Two-tailed (H₁: μ₁ − μ₂ ≠ 0)</option>
         </select>
       </div>
-      {/* Form Buttons */}
+
       <div className="flex flex-col space-y-2">
-        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">
-          Solve &amp; Graph
-        </button>
-        <button
-          type="button"
-          onClick={handleClear}
-          className="bg-gray-600 text-white px-4 py-2 rounded"
-        >
-          Clear Form
-        </button>
+        <Button type="submit">Solve &amp; Graph</Button>
+        <Button variant="outline" onClick={handleClear}>Clear Form</Button>
       </div>
-      {/* Image Output and Download Button */}
+
       {imgB64 && (
         <div className="mt-4">
           <img
             src={`data:image/png;base64,${imgB64}`}
-            alt="Plot"
-            className="border border-white"
+            alt="Two-Sample T-Test Plot"
+            className="rounded"
           />
-          <button
-            type="button"
-            onClick={handleDownload}
-            className="bg-green-600 text-white px-4 py-2 rounded mt-2"
-          >
-            Download Image
-          </button>
+          <Button onClick={handleDownload} className="mt-2">Download Image</Button>
         </div>
       )}
     </form>

@@ -1,14 +1,16 @@
+// src/components/forms/OneSampleZForm.tsx
 import React, { useState } from "react";
 import { runTestFunction } from "../../pyodideLoader";
+import { Button } from "@/components/ui/button";
 
 export default function OneSampleZForm() {
-  const defaultValues = { 
-    n: 30, 
-    sigma: 5, 
-    xBar: 10, 
-    mu: 0, 
-    alpha: 0.05, 
-    tailType: 1  // default to Left-tailed
+  const defaultValues = {
+    n: 50,
+    sigma: 10,
+    xBar: 53,
+    mu: 50,
+    alpha: 0.05,
+    tailType: 3, // default to Two-tailed
   };
 
   const [n, setN] = useState<number>(defaultValues.n);
@@ -21,19 +23,15 @@ export default function OneSampleZForm() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    try {
-      const base64 = await runTestFunction("one_sample_z_test", {
-        n,
-        sigma,
-        x_bar: xBar,
-        mu,
-        alpha,
-        tail_type: tailType,
-      });
-      setImgB64(base64);
-    } catch (error) {
-      console.error("Error generating plot:", error);
-    }
+    const base64 = await runTestFunction("one_sample_z_test", {
+      n,
+      sigma,
+      x_bar: xBar,
+      mu,
+      alpha,
+      tail_type: tailType,
+    });
+    setImgB64(base64);
   }
 
   function handleClear() {
@@ -66,7 +64,7 @@ export default function OneSampleZForm() {
           className="bg-gray-800 text-white rounded px-2 py-1"
         />
       </div>
-      
+
       {/* σ */}
       <div className="flex flex-col">
         <label className="mb-1">σ:</label>
@@ -78,7 +76,7 @@ export default function OneSampleZForm() {
           className="bg-gray-800 text-white rounded px-2 py-1"
         />
       </div>
-      
+
       {/* x̄ */}
       <div className="flex flex-col">
         <label className="mb-1">x̄:</label>
@@ -90,7 +88,7 @@ export default function OneSampleZForm() {
           className="bg-gray-800 text-white rounded px-2 py-1"
         />
       </div>
-      
+
       {/* μ */}
       <div className="flex flex-col">
         <label className="mb-1">μ:</label>
@@ -102,7 +100,7 @@ export default function OneSampleZForm() {
           className="bg-gray-800 text-white rounded px-2 py-1"
         />
       </div>
-      
+
       {/* α */}
       <div className="flex flex-col">
         <label className="mb-1">α:</label>
@@ -114,8 +112,8 @@ export default function OneSampleZForm() {
           className="bg-gray-800 text-white rounded px-2 py-1"
         />
       </div>
-      
-      {/* Tail Type Dropdown */}
+
+      {/* Tail Type */}
       <div className="flex flex-col">
         <label className="mb-1">Tail Type:</label>
         <select
@@ -123,35 +121,27 @@ export default function OneSampleZForm() {
           onChange={(e) => setTailType(Number(e.target.value))}
           className="bg-gray-800 text-white rounded px-2 py-1"
         >
-          <option value={1}>
-            Left-tailed (H₁: μ &lt; μ₀)
-          </option>
-          <option value={2}>
-            Right-tailed (H₁: μ &gt; μ₀)
-          </option>
-          <option value={3}>
-            Two-tailed (H₁: μ &ne; μ₀)
-          </option>
+          <option value={1}>Left-tailed (H₁: μ &lt; μ₀)</option>
+          <option value={2}>Right-tailed (H₁: μ &gt; μ₀)</option>
+          <option value={3}>Two-tailed (H₁: μ ≠ μ₀)</option>
         </select>
       </div>
-      
-      {/* Form Buttons */}
+
+      {/* Buttons */}
       <div className="flex flex-col space-y-2">
-        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">
-          Solve &amp; Graph
-        </button>
-        <button type="button" onClick={handleClear} className="bg-gray-600 text-white px-4 py-2 rounded">
-          Clear Form
-        </button>
+        <Button type="submit">Solve &amp; Graph</Button>
+        <Button variant="outline" onClick={handleClear}>Clear Form</Button>
       </div>
-      
-      {/* Plot Output and Download Button */}
+
+      {/* Plot & Download */}
       {imgB64 && (
         <div className="mt-4">
-          <img src={`data:image/png;base64,${imgB64}`} alt="Plot" className="border border-white" />
-          <button type="button" onClick={handleDownload} className="bg-green-600 text-white px-4 py-2 rounded mt-2">
-            Download Image
-          </button>
+          <img
+            src={`data:image/png;base64,${imgB64}`}
+            alt="Z-Test Plot"
+            className="rounded"
+          />
+          <Button onClick={handleDownload} className="mt-2">Download Image</Button>
         </div>
       )}
     </form>

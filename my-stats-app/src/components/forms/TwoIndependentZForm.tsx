@@ -1,17 +1,20 @@
+// src/components/forms/TwoIndependentZForm.tsx
 import React, { useState } from "react";
 import { runTestFunction } from "../../pyodideLoader";
+import { Button } from "@/components/ui/button";
 
 export default function TwoIndependentZForm() {
-  const defaultValues = { 
-    n1: 35, 
-    n2: 40, 
-    sigma1: 3.2, 
-    sigma2: 3.4, 
-    xBar1: 10.5, 
-    xBar2: 9.8, 
-    alpha: 0.05, 
-    tailType: 1  // default to Left-tailed
+  const defaultValues = {
+    n1: 50,        // sample size group 1
+    n2: 50,        // sample size group 2
+    sigma1: 5,     // known σ₁
+    sigma2: 5,     // known σ₂
+    xBar1: 100,    // mean group 1
+    xBar2: 98.2,     // mean group 2
+    alpha: 0.05,   // significance level
+    tailType: 3,   // default to Two-tailed
   };
+
   const [n1, setN1] = useState<number>(defaultValues.n1);
   const [n2, setN2] = useState<number>(defaultValues.n2);
   const [sigma1, setSigma1] = useState<number>(defaultValues.sigma1);
@@ -21,9 +24,24 @@ export default function TwoIndependentZForm() {
   const [alpha, setAlpha] = useState<number>(defaultValues.alpha);
   const [tailType, setTailType] = useState<number>(defaultValues.tailType);
   const [imgB64, setImgB64] = useState<string>("");
+  const [error, setError] = useState<string>("");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setError("");
+    if (n1 < 2 || n2 < 2) {
+      setError("Both sample sizes must be at least 2.");
+      return;
+    }
+    if (sigma1 <= 0 || sigma2 <= 0) {
+      setError("Population standard deviations must be positive.");
+      return;
+    }
+    if (alpha <= 0 || alpha >= 1) {
+      setError("Significance level α must be between 0 and 1 (exclusive).");
+      return;
+    }
+
     try {
       const base64 = await runTestFunction("two_independent_z_test", {
         n1,
@@ -36,8 +54,8 @@ export default function TwoIndependentZForm() {
         tail_type: tailType,
       });
       setImgB64(base64);
-    } catch (error) {
-      console.error("Error generating plot:", error);
+    } catch {
+      setError("Unable to generate the two-sample Z-test plot.");
     }
   }
 
@@ -51,6 +69,7 @@ export default function TwoIndependentZForm() {
     setAlpha(defaultValues.alpha);
     setTailType(defaultValues.tailType);
     setImgB64("");
+    setError("");
   }
 
   function handleDownload() {
@@ -63,7 +82,10 @@ export default function TwoIndependentZForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 p-4">
-      {/* n₁ */}
+      {error && (
+        <div className="bg-red-100 text-red-800 px-3 py-2 rounded">{error}</div>
+      )}
+
       <div className="flex flex-col">
         <label className="mb-1">n₁:</label>
         <input
@@ -73,8 +95,6 @@ export default function TwoIndependentZForm() {
           className="bg-gray-800 text-white rounded px-2 py-1"
         />
       </div>
-      
-      {/* n₂ */}
       <div className="flex flex-col">
         <label className="mb-1">n₂:</label>
         <input
@@ -84,8 +104,7 @@ export default function TwoIndependentZForm() {
           className="bg-gray-800 text-white rounded px-2 py-1"
         />
       </div>
-      
-      {/* σ₁ */}
+
       <div className="flex flex-col">
         <label className="mb-1">σ₁:</label>
         <input
@@ -96,8 +115,6 @@ export default function TwoIndependentZForm() {
           className="bg-gray-800 text-white rounded px-2 py-1"
         />
       </div>
-      
-      {/* σ₂ */}
       <div className="flex flex-col">
         <label className="mb-1">σ₂:</label>
         <input
@@ -108,8 +125,7 @@ export default function TwoIndependentZForm() {
           className="bg-gray-800 text-white rounded px-2 py-1"
         />
       </div>
-      
-      {/* x̄₁ */}
+
       <div className="flex flex-col">
         <label className="mb-1">x̄₁:</label>
         <input
@@ -120,8 +136,6 @@ export default function TwoIndependentZForm() {
           className="bg-gray-800 text-white rounded px-2 py-1"
         />
       </div>
-      
-      {/* x̄₂ */}
       <div className="flex flex-col">
         <label className="mb-1">x̄₂:</label>
         <input
@@ -132,8 +146,7 @@ export default function TwoIndependentZForm() {
           className="bg-gray-800 text-white rounded px-2 py-1"
         />
       </div>
-      
-      {/* α */}
+
       <div className="flex flex-col">
         <label className="mb-1">α:</label>
         <input
@@ -144,8 +157,7 @@ export default function TwoIndependentZForm() {
           className="bg-gray-800 text-white rounded px-2 py-1"
         />
       </div>
-      
-      {/* Tail Type Dropdown */}
+
       <div className="flex flex-col">
         <label className="mb-1">Tail Type:</label>
         <select
@@ -153,29 +165,24 @@ export default function TwoIndependentZForm() {
           onChange={(e) => setTailType(Number(e.target.value))}
           className="bg-gray-800 text-white rounded px-2 py-1"
         >
-          <option value={1}>Left-tailed (H₁: x̄₁ - x̄₂ &lt; 0)</option>
-          <option value={2}>Right-tailed (H₁: x̄₁ - x̄₂ &gt; 0)</option>
-          <option value={3}>Two-tailed (H₁: x̄₁ - x̄₂ &ne; 0)</option>
+          <option value={1}>Left-tailed (H₁: μ₁ − μ₂ &lt; 0)</option>
+          <option value={2}>Right-tailed (H₁: μ₁ − μ₂ &gt; 0)</option>
+          <option value={3}>Two-tailed (H₁: μ₁ − μ₂ ≠ 0)</option>
         </select>
       </div>
-      
-      {/* Form Buttons */}
+
       <div className="flex flex-col space-y-2">
-        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">
-          Solve &amp; Graph
-        </button>
-        <button type="button" onClick={handleClear} className="bg-gray-600 text-white px-4 py-2 rounded">
-          Clear Form
-        </button>
+        <Button type="submit">Solve &amp; Graph</Button>
+        <Button variant="outline" onClick={handleClear}>Clear Form</Button>
       </div>
-      
-      {/* Image Output and Download */}
+
       {imgB64 && (
         <div className="mt-4">
-          <img src={`data:image/png;base64,${imgB64}`} alt="Plot" className="border border-white" />
-          <button type="button" onClick={handleDownload} className="bg-green-600 text-white px-4 py-2 rounded mt-2">
-            Download Image
-          </button>
+          <img
+            src={`data:image/png;base64,${imgB64}`}  alt="Two-Sample Z-Test Plot"
+            className="rounded"
+          />
+          <Button onClick={handleDownload} className="mt-2">Download Image</Button>
         </div>
       )}
     </form>

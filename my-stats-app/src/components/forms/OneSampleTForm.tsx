@@ -1,15 +1,16 @@
+// src/components/forms/OneSampleTForm.tsx
 import React, { useState } from "react";
 import { runTestFunction } from "../../pyodideLoader";
+import { Button } from "@/components/ui/button";
 
 export default function OneSampleTForm() {
-  // Updated so that tailType can be 1 (left), 2 (right), or 3 (two-tailed)
   const defaultValues = {
-    n: 30,
-    s: 10,
-    xBar: 5,
-    mu: 0,
-    alpha: 0.05,
-    tailType: 1, // default to Left-tailed
+    n: 25,               // sample size
+    s: 8,                // sample standard deviation
+    xBar: 52,            // sample mean
+    mu: 50,              // hypothesized mean
+    alpha: 0.05,         // significance level
+    tailType: 3,         // default to Two-tailed
   };
 
   const [n, setN] = useState<number>(defaultValues.n);
@@ -19,11 +20,12 @@ export default function OneSampleTForm() {
   const [alpha, setAlpha] = useState<number>(defaultValues.alpha);
   const [tailType, setTailType] = useState<number>(defaultValues.tailType);
   const [imgB64, setImgB64] = useState<string>("");
+  const [error, setError] = useState<string>("");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setError("");
     try {
-      // tailType is already a number (1, 2, or 3).
       const base64 = await runTestFunction("one_sample_t_test", {
         n,
         s,
@@ -33,8 +35,8 @@ export default function OneSampleTForm() {
         tail_type: tailType,
       });
       setImgB64(base64);
-    } catch (error) {
-      console.error("Error generating plot:", error);
+    } catch {
+      setError("Unable to generate the one-sample t-test plot.");
     }
   }
 
@@ -46,6 +48,7 @@ export default function OneSampleTForm() {
     setAlpha(defaultValues.alpha);
     setTailType(defaultValues.tailType);
     setImgB64("");
+    setError("");
   }
 
   function handleDownload() {
@@ -58,7 +61,12 @@ export default function OneSampleTForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 p-4">
-      {/* n */}
+      {error && (
+        <div className="bg-red-100 text-red-800 px-3 py-2 rounded">
+          {error}
+        </div>
+      )}
+
       <div className="flex flex-col">
         <label className="mb-1">n:</label>
         <input
@@ -69,9 +77,8 @@ export default function OneSampleTForm() {
         />
       </div>
 
-      {/* s */}
       <div className="flex flex-col">
-        <label className="mb-1">s (sample standard deviation):</label>
+        <label className="mb-1">s (sample SD):</label>
         <input
           type="number"
           step="0.01"
@@ -81,7 +88,6 @@ export default function OneSampleTForm() {
         />
       </div>
 
-      {/* x̄ */}
       <div className="flex flex-col">
         <label className="mb-1">x̄ (sample mean):</label>
         <input
@@ -93,7 +99,6 @@ export default function OneSampleTForm() {
         />
       </div>
 
-      {/* μ */}
       <div className="flex flex-col">
         <label className="mb-1">μ (hypothesized mean):</label>
         <input
@@ -105,9 +110,8 @@ export default function OneSampleTForm() {
         />
       </div>
 
-      {/* α */}
       <div className="flex flex-col">
-        <label className="mb-1">α (significance level):</label>
+        <label className="mb-1">α:</label>
         <input
           type="number"
           step="0.001"
@@ -117,7 +121,6 @@ export default function OneSampleTForm() {
         />
       </div>
 
-      {/* Tail Type Dropdown */}
       <div className="flex flex-col">
         <label className="mb-1">Tail Type:</label>
         <select
@@ -125,47 +128,25 @@ export default function OneSampleTForm() {
           onChange={(e) => setTailType(Number(e.target.value))}
           className="bg-gray-800 text-white rounded px-2 py-1"
         >
-          <option value={1}>
-            Left-tailed (H₁: μ &lt; μ₀)
-          </option>
-          <option value={2}>
-            Right-tailed (H₁: μ &gt; μ₀)
-          </option>
-          <option value={3}>
-            Two-tailed (H₁: μ &ne; μ₀)
-          </option>
+          <option value={1}>Left-tailed (H₁: μ &lt; μ₀)</option>
+          <option value={2}>Right-tailed (H₁: μ &gt; μ₀)</option>
+          <option value={3}>Two-tailed (H₁: μ ≠ μ₀)</option>
         </select>
       </div>
 
-      {/* Form Buttons */}
       <div className="flex flex-col space-y-2">
-        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">
-          Solve &amp; Graph
-        </button>
-        <button
-          type="button"
-          onClick={handleClear}
-          className="bg-gray-600 text-white px-4 py-2 rounded"
-        >
-          Clear Form
-        </button>
+        <Button type="submit">Solve &amp; Graph</Button>
+        <Button variant="outline" onClick={handleClear}>Clear Form</Button>
       </div>
 
-      {/* Resulting Plot and Download Button */}
       {imgB64 && (
         <div className="mt-4">
           <img
             src={`data:image/png;base64,${imgB64}`}
             alt="T-Test Plot"
-            className="border border-white"
+            className="rounded"
           />
-          <button
-            type="button"
-            onClick={handleDownload}
-            className="bg-green-600 text-white px-4 py-2 rounded mt-2"
-          >
-            Download Image
-          </button>
+          <Button onClick={handleDownload} className="mt-2">Download Image</Button>
         </div>
       )}
     </form>

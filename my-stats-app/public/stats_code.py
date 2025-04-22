@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.stats import t, norm
 import io
 import base64
 
@@ -55,6 +54,10 @@ def create_figure_with_info_box(info_text: str):
         gridspec_kw={'width_ratios': [1, 4]},
         figsize=(12, 8)
     )
+
+    #fig.patch.set_facecolor('#C7D9DD')
+    #ax_graph.set_facecolor('#F0F2F5')  
+
     # Add top/bottom padding so the graph isn't sticking to edges
     fig.subplots_adjust(left=0.05, right=0.98, top=0.92, bottom=0.08, wspace=0.1)
 
@@ -103,8 +106,8 @@ def plot_test_distribution(
     DARK_GRAY = '#504B38'
     COLOR_CURVE = '#ADB2D4'
     COLOR_SHADE = '#C7D9DD'
-    MARKER_SIZE = 8
-    BIG_MARKER_SIZE = 8
+    MARKER_SIZE = 10
+    BIG_MARKER_SIZE = 10
     MULTIPLIER = 1.15
 
     def format_val(v):
@@ -118,14 +121,13 @@ def plot_test_distribution(
         return f"{p:.3g}"
 
     def vertical_line_with_marker(x_val, top_y, label_str, line_style, marker_style='.', marker_sz=MARKER_SIZE):
-        """Draw a vertical line from (x_val, 0) to (x_val, top_y),
-           with a marker at the bottom only."""
         ax_graph.plot(
             [x_val, x_val], [0, top_y],
-            color=DARK_GRAY, linestyle=line_style, lw=2,
+            color='#7E4794' if line_style == '--' else '#ff8ca1', linestyle=line_style, lw=2,
             marker=marker_style, markersize=marker_sz,
             markevery=[0],  # marker only at the bottom
-            label=label_str
+            label=label_str,
+            zorder=10
         )
 
     # ------------------------------
@@ -332,6 +334,75 @@ def plot_test_distribution(
 
 
 
+def plot_chi_square_distribution(
+    ax_graph,
+    alpha: float,
+    test_stat: float,
+    p_value: float,
+    test_name: str,
+    df: int,
+):
+    from scipy.stats import chi2
+    import numpy as np
+
+    DARK_GRAY = '#504B38'
+    COLOR_CURVE = '#ADB2D4'
+    COLOR_SHADE = '#C7D9DD'
+    MARKER_SIZE = 10
+    MULTIPLIER = 1.15
+
+    def vertical_line_with_marker(x_val, top_y, label_str, line_style, marker_style='.', marker_sz=MARKER_SIZE):
+        ax_graph.plot(
+            [x_val, x_val], [0, top_y],
+            color='#7E4794' if line_style == '--' else '#ff8ca1', linestyle=line_style, lw=2,
+            marker=marker_style, markersize=marker_sz,
+            markevery=[0],  # marker only at the bottom
+            label=label_str,
+            zorder=100
+        )
+
+    x_min = 0 if df > 2 else 1e-6
+    x_max = chi2.ppf(0.999, df)
+    x_vals = np.linspace(x_min, x_max, 1000)
+    y_vals = chi2.pdf(x_vals, df)
+    y_vals = np.minimum(y_vals, 1.0)
+    ax_graph.plot(x_vals, y_vals, label="$\chi^2$-distribution", color=COLOR_CURVE, lw=2)
+
+    chi_crit = chi2.ppf(1 - alpha, df)
+    shade_vals = np.linspace(chi_crit, x_max, 500)
+    shade_pdf = np.minimum(chi2.pdf(shade_vals, df), 1.0)
+    ax_graph.fill_between(shade_vals, shade_pdf, color=COLOR_SHADE, alpha=0.7, label=f"Critical region ($\\alpha={format_alpha(alpha)}$)")
+
+    top_y = min(chi2.pdf(chi_crit, df) * MULTIPLIER, 1.0)
+    vertical_line_with_marker(chi_crit, top_y, f"$\\chi^2_c={format_val(chi_crit)}$", '--')
+
+    boundary = max(x_min, min(x_max, test_stat))
+    top_stat = min(chi2.pdf(boundary, df) * MULTIPLIER, 1.0)
+    vertical_line_with_marker(boundary, top_stat, f"$\\chi^2={format_val(test_stat)}$", '-')
+
+    ax_graph.plot([], [], ' ', label=f"$p-value = {format_scientific_latex(p_value)}$")
+
+    if df == 1:
+        h0_x_pos = 0.5
+        h0_y_pos = min(chi2.pdf(h0_x_pos, df) * 0.25, 1.0)
+    elif df == 2:
+        h0_x_pos = 1
+        h0_y_pos = min(chi2.pdf(h0_x_pos, df) * 0.4, 1.0)
+    else:
+        h0_x_pos = df - 2
+        h0_y_pos = min(chi2.pdf(h0_x_pos, df) * 0.45, 1.0)
+
+    ax_graph.text(h0_x_pos, h0_y_pos, r"$H_0$", fontsize=14, ha='center', va='center', color=DARK_GRAY)
+    ax_graph.set_xlabel("$\\chi^2$", color=DARK_GRAY)
+    ax_graph.set_ylabel("$Probability$", color=DARK_GRAY)
+    ax_graph.set_title(test_name, color=DARK_GRAY)
+    ax_graph.set_xlim(x_min, x_max)
+    ax_graph.set_ylim(0, np.max(y_vals) * 1.35)
+    ax_graph.legend()
+
+
+
+
 ##############################################################################
 # 1) One-Sample T-Test
 ##############################################################################
@@ -477,7 +548,8 @@ def one_sample_proportion_z_test(n, p_hat, p, alpha, tail_type=1):
     info_text = (
         f"$n = {n}$\n\n"
         f"$\\hat{{p}} = {format_val(p_hat)}$\n\n"
-        f"$p = {format_val(p)},\\ q=1-p$\n\n"
+        f"$p = {format_val(p)}$\n\n"
+        f"$q = 1-p$\n\n"
         f"{crit_str}\n\n"
         f"$z = {format_val(z_stat)}$\n\n"
         f"$\\alpha = {format_alpha(alpha)}$\n\n\n"
@@ -869,7 +941,8 @@ def two_independent_proportion_z_test(x1, x2, n1, n2, alpha, tail_type=1):
         f"$n_2 = {n2}$\n\n"
         f"$\\hat{{p}}_1 = {format_val(p1_hat)}$\n\n"
         f"$\\hat{{p}}_2 = {format_val(p2_hat)}$\n\n"
-        f"$\\hat{{p}} = {format_val(p_hat)},\\ \\hat{{q}}=1-\\hat{{p}}$\n\n"
+        f"$\\hat{{p}} = {format_val(p_hat)}$\n\n"
+        f"$\\hat{{q}} = 1-\\hat{{p}}$\n\n"
         f"{crit_str}\n\n"
         f"$z = {format_val(z_stat)}$\n\n"
         f"$\\alpha = {format_alpha(alpha)}$\n\n\n"
@@ -890,6 +963,65 @@ def two_independent_proportion_z_test(x1, x2, n1, n2, alpha, tail_type=1):
     )
     return fig, ax_info, ax_graph
 
+##############################################################################
+# 10) Chi-Square Goodness of Fit Test
+##############################################################################
+def chi_square_gof_test(observed, expected, alpha):
+    from scipy.stats import chi2
+    import numpy as np
+    obs = np.array(observed)
+    exp = np.array(expected)
+    chi_stat = np.sum((obs - exp)**2 / exp)
+    df = len(obs) - 1
+    chi_crit = chi2.ppf(1 - alpha, df)
+    p_value = 1 - chi2.cdf(chi_stat, df)
+    info_text = (
+        f"$k = {len(obs)}$\n\n"
+        f"$df = {df}$\n\n"
+        f"$\\chi^2_c = {format_val(chi_crit)}$\n\n"
+        f"$\\chi^2 = {format_val(chi_stat)}$\n\n"
+        f"$\\alpha = {format_alpha(alpha)}$\n\n\n"
+        f"$\\chi^2 = \\sum \\frac{{(O_i - E_i)^2}}{{E_i}} = {format_val(chi_stat)}$"
+    )
+    fig, ax_info, ax_graph = create_figure_with_info_box(info_text)
+    plot_chi_square_distribution(
+        ax_graph=ax_graph,
+        alpha=alpha,
+        test_stat=chi_stat,
+        p_value=p_value,
+        test_name="Chi-Square Goodness of Fit Test",
+        df=df
+    )
+    return fig, ax_info, ax_graph
+
+##############################################################################
+# 11) Chi-Square Independent Test
+##############################################################################
+def chi_square_independence_test(observed_table, alpha):
+    from scipy.stats import chi2_contingency, chi2
+    import numpy as np
+    table = np.array(observed_table)
+    chi_stat, p_value, df, expected = chi2_contingency(table)
+    chi_crit = chi2.ppf(1 - alpha, df)
+    info_text = (
+        f"$r = {table.shape[0]}, c = {table.shape[1]}$\n\n"
+        f"$df = {df}$\n\n"
+        f"$\\chi^2_c = {format_val(chi_crit)}$\n\n"
+        f"$\\chi^2 = {format_val(chi_stat)}$\n\n"
+        f"$\\alpha = {format_alpha(alpha)}$\n\n\n"
+        f"$\\chi^2 = \\sum \\frac{{(O_{{ij}} - E_{{ij}})^2}}{{E_{{ij}}}} = {format_val(chi_stat)}$"
+    )
+    fig, ax_info, ax_graph = create_figure_with_info_box(info_text)
+    plot_chi_square_distribution(
+        ax_graph=ax_graph,
+        alpha=alpha,
+        test_stat=chi_stat,
+        p_value=p_value,
+        test_name="Chi-Square Test of Independence",
+        df=df
+    )
+    return fig, ax_info, ax_graph
+
 
 def show_figure(fig):
     """Explicitly show the figure on screen."""
@@ -898,7 +1030,6 @@ def show_figure(fig):
 def save_figure(fig, filename="my_figure.png"):
     """Save the figure to a file with tight layout."""
     fig.savefig(filename, bbox_inches='tight')
-
 
 def _wrap_test_function(func):
     def wrapped(*args, **kwargs):
@@ -920,4 +1051,6 @@ TESTS["two_dependent_t_test"] = _wrap_test_function(two_dependent_t_test)
 TESTS["two_dependent_proportion_test"] = _wrap_test_function(two_dependent_proportion_test)
 TESTS["two_independent_z_test"] = _wrap_test_function(two_independent_z_test)
 TESTS["two_independent_t_test"] = _wrap_test_function(two_independent_t_test)
+TESTS["chi_square_gof_test"] = _wrap_test_function(chi_square_gof_test)
+TESTS["chi_square_independence_test"] = _wrap_test_function(chi_square_independence_test)
 TESTS["two_independent_proportion_z_test"] = _wrap_test_function(two_independent_proportion_z_test)
