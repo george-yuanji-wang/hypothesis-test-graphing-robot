@@ -34,7 +34,7 @@ export async function initPyodide() {
   try {
     const proxy = pyodide.runPython('list(TESTS.keys())');
     const keys = proxy.toJs ? proxy.toJs() : proxy;
-    console.log('🐍 TESTS keys:', keys);
+    console.log('TESTS keys:', keys);
     proxy.destroy?.();
   } catch (e) {
     console.error('Could not inspect TESTS.keys():', e);

@@ -52,10 +52,11 @@ def create_figure_with_info_box(info_text: str):
     fig, (ax_info, ax_graph) = plt.subplots(
         1, 2,
         gridspec_kw={'width_ratios': [1, 4]},
-        figsize=(12, 8)
+        figsize=(12, 8),
+        facecolor='#FAF0E6' 
     )
-
-    #fig.patch.set_facecolor('#C7D9DD')
+    #faf0e6
+    #fig.patch.set_facecolor('FAF0E6')
     #ax_graph.set_facecolor('#F0F2F5')  
 
     # Add top/bottom padding so the graph isn't sticking to edges
