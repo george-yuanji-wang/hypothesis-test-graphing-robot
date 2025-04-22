@@ -48,9 +48,13 @@ export default function MainContent() {
       <Tabs defaultValue="oneSampleT" className="flex-grow flex flex-col">
         {/* Header */}
         <header className="w-full max-w-3xl mx-auto p-4">
-          <h1 className="text-4xl font-bold text-center mb-4">
+          <h1 className="text-4xl font-bold text-center mb-8">
             Hypothesis Test Plotter
           </h1>
+          <p className="text-center text-xs mb-10 text-gray-400">
+          This tool is specifically designed to automatically generate graphs and plots that meet the AP Statistics Semester 2 project’s requirements. This software is provided “as is,” without any warranty of any kind. The author accepts no liability for errors, omissions, or misuse of the tool. Users should verify the results themselves.
+          </p>
+
           <TabsList className="grid grid-cols-3 gap-4">
             <TabsTrigger value="oneSampleT">One-Sample T</TabsTrigger>
             <TabsTrigger value="oneSampleZ">One-Sample Z</TabsTrigger>
@@ -233,10 +237,10 @@ export default function MainContent() {
         <h2 className="text-3xl font-bold mb-4">Updates:</h2>
         <div className="text-sm">
           <div className="py-2">
-            <span className="font-semibold">April 22, 2025</span> - Added support for the Chi-Square Goodness of Fit test and the Chi-Square Independence Test.
+            <span className="font-semibold">April 22, 2025</span> - Added support for the Chi-Square Goodness of Fit test and the Chi-Square Independence Test. Fixed minor bugs.
           </div>
           <div className="py-2 pl-4">
-            <span className="font-semibold">March 23, 2025</span> - Initial setup: included nine hypothesis tests for means and proportions. Created a pipeline for plotting and a flexible information box.
+            <span className="font-semibold">March 23, 2025</span> - Initial setup: included nine hypothesis tests for means and proportions. Created the pipeline for plotting and the flexible information box.
           </div>
         </div>
       </div>
