@@ -27,6 +27,7 @@ import TwoIndependentTForm from "./components/forms/TwoIndependentTForm"
 import TwoIndependentProportionForm from "./components/forms/TwoIndependentProportionForm"
 import ChiSquareGofForm from "./components/forms/ChiSquareGofForm"
 import ChiSquareIndependenceForm from "./components/forms/ChiSquareIndependenceForm"
+import ChiSquareHomogeneityForm from "./components/forms/ChiSquareHomogeneityForm"
 
 export default function MainContent() {
   const [pyReady, setPyReady] = useState(false)
@@ -67,11 +68,13 @@ export default function MainContent() {
             <TabsTrigger value="twoIndPropZ">2-Independent Prop Z</TabsTrigger>
             <TabsTrigger value="chiGOF">Chi-Square Goodness of Fit test</TabsTrigger>
             <TabsTrigger value="chiIND">Chi-Square Independence test</TabsTrigger>
+            <TabsTrigger value="chiHOM">Chi-Square Test of Homogeneity</TabsTrigger>
+            
           </TabsList>
         </header>
 
         {/* Main content area */}
-        <main className="w-full max-w-3xl mt-30 mx-auto p-4 flex-grow">
+        <main className="w-full max-w-3xl mt-40 mx-auto p-4 flex-grow">
           <TabsContent value="oneSampleT" className="mt-4">
             <Card className="w-full">
               <CardHeader>
@@ -226,6 +229,20 @@ export default function MainContent() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <ChiSquareIndependenceForm />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="chiHOM" className="mt-4">
+            <Card className="w-full">
+              <CardHeader>
+                <CardTitle>Chi-Square Test of Homogeneity</CardTitle>
+                <CardDescription>
+                  Enter parameters and click "Solve" to generate the plot.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <ChiSquareHomogeneityForm />
               </CardContent>
             </Card>
           </TabsContent>

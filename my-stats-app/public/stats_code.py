@@ -1023,6 +1023,32 @@ def chi_square_independence_test(observed_table, alpha):
     )
     return fig, ax_info, ax_graph
 
+def chi_square_homogeneity_test(observed_table, alpha):
+    from scipy.stats import chi2_contingency, chi2
+    import numpy as np
+    table = np.array(observed_table)
+    chi_stat, p_value, df, expected = chi2_contingency(table)
+    chi_crit = chi2.ppf(1 - alpha, df)
+    info_text = (
+        f"$r = {table.shape[0]}, c = {table.shape[1]}$\n\n"
+        f"$df = {df}$\n\n"
+        f"$\\chi^2_c = {format_val(chi_crit)}$\n\n"
+        f"$\\chi^2 = {format_val(chi_stat)}$\n\n"
+        f"$\\alpha = {format_alpha(alpha)}$\n\n\n"
+        f"$\\chi^2 = \\sum \\frac{{(O_{{ij}} - E_{{ij}})^2}}{{E_{{ij}}}} = {format_val(chi_stat)}$"
+    )
+    fig, ax_info, ax_graph = create_figure_with_info_box(info_text)
+    plot_chi_square_distribution(
+        ax_graph=ax_graph,
+        alpha=alpha,
+        test_stat=chi_stat,
+        p_value=p_value,
+        test_name="Chi-Square Test of Homogeneity",
+        df=df
+    )
+    return fig, ax_info, ax_graph
+
+
 
 def show_figure(fig):
     """Explicitly show the figure on screen."""
@@ -1055,3 +1081,4 @@ TESTS["two_independent_t_test"] = _wrap_test_function(two_independent_t_test)
 TESTS["chi_square_gof_test"] = _wrap_test_function(chi_square_gof_test)
 TESTS["chi_square_independence_test"] = _wrap_test_function(chi_square_independence_test)
 TESTS["two_independent_proportion_z_test"] = _wrap_test_function(two_independent_proportion_z_test)
+TESTS["chi_square_homogeneity_test"] = _wrap_test_function(chi_square_homogeneity_test)
