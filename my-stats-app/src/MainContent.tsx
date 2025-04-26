@@ -254,6 +254,9 @@ export default function MainContent() {
         <h2 className="text-3xl font-bold mb-4">Updates:</h2>
         <div className="text-sm">
           <div className="py-2">
+            <span className="font-semibold">April 26, 2025</span> - Added support for the Chi-Square Homogeneity test and the Chi-Square.
+          </div>
+          <div className="py-2">
             <span className="font-semibold">April 22, 2025</span> - Added support for the Chi-Square Goodness of Fit test and the Chi-Square Independence Test. Fixed minor bugs.
           </div>
           <div className="py-2 pl-4">

@@ -33,7 +33,7 @@ def format_scientific_latex(val):
 ##############################################################################
 DARK_GRAY = '#504B38'
 COLOR_CURVE = '#ADB2D4'
-COLOR_SHADE = '#C7D9DD'
+COLOR_SHADE = '#CEC2EB'
 MARKER_SIZE = 8
 BIG_MARKER_SIZE = 8  # unify
 MULTIPLIER = 1.15
@@ -53,7 +53,7 @@ def create_figure_with_info_box(info_text: str):
         1, 2,
         gridspec_kw={'width_ratios': [1, 4]},
         figsize=(12, 8),
-        facecolor='#FAF0E6' 
+        facecolor='#F0F2F5' 
     )
     #faf0e6
     #fig.patch.set_facecolor('FAF0E6')
@@ -106,20 +106,10 @@ def plot_test_distribution(
 
     DARK_GRAY = '#504B38'
     COLOR_CURVE = '#ADB2D4'
-    COLOR_SHADE = '#C7D9DD'
+    COLOR_SHADE = '#CEC2EB'
     MARKER_SIZE = 10
     BIG_MARKER_SIZE = 10
     MULTIPLIER = 1.15
-
-    def format_val(v):
-        return f"{v:.3f}"
-
-    def format_alpha(a):
-        return f"{a:.3g}"
-
-    def format_scientific_latex(p):
-        """Turns 0.000123 into something like 1.23e-4 in LaTeX form."""
-        return f"{p:.3g}"
 
     def vertical_line_with_marker(x_val, top_y, label_str, line_style, marker_style='.', marker_sz=MARKER_SIZE):
         ax_graph.plot(
@@ -348,7 +338,7 @@ def plot_chi_square_distribution(
 
     DARK_GRAY = '#504B38'
     COLOR_CURVE = '#ADB2D4'
-    COLOR_SHADE = '#C7D9DD'
+    COLOR_SHADE = '#CEC2EB'
     MARKER_SIZE = 10
     MULTIPLIER = 1.15
 
