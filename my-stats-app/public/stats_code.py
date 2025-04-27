@@ -7,21 +7,18 @@ import base64
 #                          HELPER FORMATTING FUNCTIONS
 ##############################################################################
 def format_val(val):
-    """If |val|<2, show 4 decimals; else 2 decimals."""
     if abs(val) < 2:
         return f"{val:.4f}"
     else:
         return f"{val:.2f}"
 
 def format_alpha(a):
-    """If alpha>=0.01, 2 decimals; else 5 decimals."""
     if a >= 0.01:
         return f"{a:.2f}"
     else:
         return f"{a:.5f}"
 
 def format_scientific_latex(val):
-    """3-decimals scientific notation in LaTeX, no extra $."""
     if val == 0:
         return "0"
     exponent = int(np.floor(np.log10(abs(val))))
@@ -29,26 +26,19 @@ def format_scientific_latex(val):
     return f"{mantissa:.3f}\\times10^{{{exponent}}}"
 
 ##############################################################################
-#                      CONSTANTS FOR A CONSISTENT STYLE
+#                      CONSTANTS 
 ##############################################################################
 DARK_GRAY = '#504B38'
 COLOR_CURVE = '#ADB2D4'
 COLOR_SHADE = '#CEC2EB'
 MARKER_SIZE = 8
-BIG_MARKER_SIZE = 8  # unify
+BIG_MARKER_SIZE = 8  #unify
 MULTIPLIER = 1.15
 
 ##############################################################################
-#     1) CREATE THE FIGURE WITH THE LEFT INFO BOX
+#     CREATE THE FIGURE WITH THE LEFT INFO BOX
 ##############################################################################
 def create_figure_with_info_box(info_text: str):
-    """
-    Creates a figure with 1 row & 2 columns:
-      - left subplot = info box
-      - right subplot = distribution
-    Adds consistent margins. Places info_text in a bounding box on the left.
-    Returns fig, ax_info, ax_graph
-    """
     fig, (ax_info, ax_graph) = plt.subplots(
         1, 2,
         gridspec_kw={'width_ratios': [1, 4]},
@@ -58,12 +48,11 @@ def create_figure_with_info_box(info_text: str):
     #faf0e6
     #fig.patch.set_facecolor('FAF0E6')
     #ax_graph.set_facecolor('#F0F2F5')  
-
-    # Add top/bottom padding so the graph isn't sticking to edges
+ 
     fig.subplots_adjust(left=0.05, right=0.98, top=0.92, bottom=0.08, wspace=0.1)
 
     ax_info.axis("off")
-    # Place the info text in the center with a bounding box
+ 
     ax_info.text(
         0.5, 0.5, info_text,
         ha="center", va="center", transform=ax_info.transAxes,
@@ -73,7 +62,7 @@ def create_figure_with_info_box(info_text: str):
     return fig, ax_info, ax_graph
 
 ##############################################################################
-#     2) PLOT THE DISTRIBUTION (T OR Z) WITH THE SAME STYLE
+#     PLOT THE DISTRIBUTION (T OR Z) WITH THE SAME STYLE
 ##############################################################################
 def plot_test_distribution(
     ax_graph,
@@ -82,25 +71,11 @@ def plot_test_distribution(
     tail_type: int,       # 1=left, 2=right, 3=two-tailed
     test_stat: float,
     p_value: float,
-    test_name: str,       # e.g. "One-Sample T-Test"
-    stat_label: str,      # e.g. "t" or "z"
-    df: float = None,     # only used if distribution="t"
+    test_name: str,      
+    stat_label: str,     
+    df: float = None,     
 ):
-    """
-    Plots either a t-dist or z-dist with consistent style:
-      - domain clamp
-      - critical region shading
-      - vertical lines for critical values and test_stat
-      - a marker at the x-axis intersection for each vertical line
-      - p-value in legend
-      - "H₀" annotation
-      - The title is set to `test_name`
 
-    tail_type interpretation (new style):
-      1 => left-tailed (H₁: < ...)
-      2 => right-tailed (H₁: > ...)
-      3 => two-tailed (H₁: ≠ ...)
-    """
     import numpy as np
     from scipy.stats import t, norm
 
@@ -116,7 +91,7 @@ def plot_test_distribution(
             [x_val, x_val], [0, top_y],
             color='#7E4794' if line_style == '--' else '#ff8ca1', linestyle=line_style, lw=2,
             marker=marker_style, markersize=marker_sz,
-            markevery=[0],  # marker only at the bottom
+            markevery=[0],  #marker only at the bottom
             label=label_str,
             zorder=10
         )
@@ -131,9 +106,9 @@ def plot_test_distribution(
         ax_graph.plot(x_vals, y_vals, label="$z$-distribution", color=COLOR_CURVE, lw=2)
 
         if tail_type == 1:
-            # LEFT-TAILED
+            # Left
             # Critical value for left tail => z_crit at alpha quantile
-            z_crit = norm.ppf(alpha)  # boundary on the left
+            z_crit = norm.ppf(alpha) 
             shade_vals = np.linspace(x_min, z_crit, 500)
 
             ax_graph.fill_between(
@@ -149,9 +124,9 @@ def plot_test_distribution(
             )
 
         elif tail_type == 2:
-            # RIGHT-TAILED
+            # Right
             # Critical value for right tail => z_crit at 1 - alpha
-            z_crit = norm.ppf(1 - alpha)  # boundary on the right
+            z_crit = norm.ppf(1 - alpha) 
             shade_vals = np.linspace(z_crit, x_max, 500)
 
             ax_graph.fill_between(
@@ -167,7 +142,7 @@ def plot_test_distribution(
             )
 
         else:
-            # TWO-TAILED (tail_type == 3)
+            # Both tails
             z_crit_low = norm.ppf(alpha / 2)
             z_crit_high = norm.ppf(1 - alpha / 2)
             shade_low = np.linspace(x_min, z_crit_low, 500)
@@ -211,7 +186,7 @@ def plot_test_distribution(
         # p-value
         ax_graph.plot([], [], ' ', label=f"$p-value = {format_scientific_latex(p_value)}$")
 
-        # H₀ annotation, axis, etc.
+        # H0 annotation, axis, etc.
         ax_graph.text(0, norm.pdf(0)*0.5, r"$H_0$", fontsize=14, ha='center', va='center', color=DARK_GRAY)
         ax_graph.set_xlabel(f"${stat_label}$", color=DARK_GRAY)
         ax_graph.set_ylabel("$Probability$", color=DARK_GRAY)
@@ -234,7 +209,7 @@ def plot_test_distribution(
         ax_graph.plot(x_vals, y_vals, label="$t$-distribution", color=COLOR_CURVE, lw=2)
 
         if tail_type == 1:
-            # LEFT-TAILED
+            # Left
             t_crit = t.ppf(alpha, df)
             shade_vals = np.linspace(x_min, t_crit, 500)
 
@@ -251,7 +226,7 @@ def plot_test_distribution(
             )
 
         elif tail_type == 2:
-            # RIGHT-TAILED
+            # Right
             t_crit = t.ppf(1 - alpha, df)
             shade_vals = np.linspace(t_crit, x_max, 500)
 
@@ -268,7 +243,7 @@ def plot_test_distribution(
             )
 
         else:
-            # TWO-TAILED (tail_type == 3)
+            # Both tails
             t_crit_low = t.ppf(alpha / 2, df)
             t_crit_high = t.ppf(1 - alpha / 2, df)
             shade_low = np.linspace(x_min, t_crit_low, 500)
@@ -347,7 +322,7 @@ def plot_chi_square_distribution(
             [x_val, x_val], [0, top_y],
             color='#7E4794' if line_style == '--' else '#ff8ca1', linestyle=line_style, lw=2,
             marker=marker_style, markersize=marker_sz,
-            markevery=[0],  # marker only at the bottom
+            markevery=[0],  #marker only at the bottom
             label=label_str,
             zorder=100
         )
@@ -398,29 +373,25 @@ def plot_chi_square_distribution(
 # 1) One-Sample T-Test
 ##############################################################################
 def one_sample_t_test(n, s, x_bar, mu, alpha, tail_type=1):
-    """
-    One-sample t-test.
-    Returns (fig, ax_info, ax_graph), does NOT show or save by default.
-    """
     from scipy.stats import t
     df = n - 1
     t_stat = (x_bar - mu) / (s / (n**0.5))
 
-    # Decide critical value(s) and p-value
+    
     if tail_type == 1:
-        # LEFT-TAILED
+        # Left
         t_crit = t.ppf(alpha, df)
         crit_str = f"$t_c = {format_val(t_crit)}$"
         p_value = t.cdf(t_stat, df)
 
     elif tail_type == 2:
-        # RIGHT-TAILED
+        # Right
         t_crit = t.ppf(1 - alpha, df)
         crit_str = f"$t_c = {format_val(t_crit)}$"
         p_value = 1 - t.cdf(t_stat, df)
 
     else:
-        # TWO-TAILED (tail_type == 3)
+        # Both tails
         t_crit_val = t.ppf(1 - alpha / 2, df)
         crit_str = f"$t_c = \\pm\\,{format_val(t_crit_val)}$"
         p_value = 2 * (1 - t.cdf(abs(t_stat), df))
@@ -456,27 +427,23 @@ def one_sample_t_test(n, s, x_bar, mu, alpha, tail_type=1):
 # 2) One-Sample Z-Test
 ##############################################################################
 def one_sample_z_test(n, sigma, x_bar, mu, alpha, tail_type=1):
-    """
-    One-sample Z-test, known sigma.
-    Returns figure, does NOT show/save automatically.
-    """
     from scipy.stats import norm
     z_stat = (x_bar - mu) / (sigma / (n**0.5))
 
     if tail_type == 1:
-        # LEFT-TAILED
+        # Left
         z_crit = norm.ppf(alpha)
         crit_str = f"$z_c = {format_val(z_crit)}$"
         p_value = norm.cdf(z_stat)
 
     elif tail_type == 2:
-        # RIGHT-TAILED
+        # Right
         z_crit = norm.ppf(1 - alpha)
         crit_str = f"$z_c = {format_val(z_crit)}$"
         p_value = 1 - norm.cdf(z_stat)
 
     else:
-        # TWO-TAILED (tail_type == 3)
+        # Both tails
         z_crit_val = norm.ppf(1 - alpha / 2)
         crit_str = f"$z_c = \\pm\\,{format_val(z_crit_val)}$"
         p_value = 2 * (1 - norm.cdf(abs(z_stat)))
@@ -509,29 +476,25 @@ def one_sample_z_test(n, sigma, x_bar, mu, alpha, tail_type=1):
 # 3) One-Sample Proportion Z-Test
 ##############################################################################
 def one_sample_proportion_z_test(n, p_hat, p, alpha, tail_type=1):
-    """
-    One-sample proportion z-test.
-    Returns figure, does NOT show/save automatically.
-    """
     from scipy.stats import norm
 
     q = 1 - p
     z_stat = (p_hat - p) / ((p*q / n)**0.5)
 
     if tail_type == 1:
-        # LEFT-TAILED
+        # Left
         z_crit = norm.ppf(alpha)
         crit_str = f"$z_c = {format_val(z_crit)}$"
         p_value = norm.cdf(z_stat)
 
     elif tail_type == 2:
-        # RIGHT-TAILED
+        # Right
         z_crit = norm.ppf(1 - alpha)
         crit_str = f"$z_c = {format_val(z_crit)}$"
         p_value = 1 - norm.cdf(z_stat)
 
     else:
-        # TWO-TAILED (tail_type == 3)
+        # Both tails
         z_crit_val = norm.ppf(1 - alpha / 2)
         crit_str = f"$z_c = \\pm\\,{format_val(z_crit_val)}$"
         p_value = 2 * (1 - norm.cdf(abs(z_stat)))
@@ -565,28 +528,24 @@ def one_sample_proportion_z_test(n, p_hat, p, alpha, tail_type=1):
 # 4) Two-Dependent-Sample Z-Test (sigma_d known)
 ##############################################################################
 def two_dependent_z_test(n, sigma_d, d_bar, alpha, tail_type=1):
-    """
-    Two-dependent-sample Z-test, difference = X1 - X2, sigma_d known.
-    Returns figure, does NOT show/save automatically.
-    """
     from scipy.stats import norm
 
     z_stat = d_bar / (sigma_d / (n**0.5))
 
     if tail_type == 1:
-        # LEFT-TAILED
+        # Left
         z_crit = norm.ppf(alpha)
         crit_str = f"$z_c = {format_val(z_crit)}$"
         p_value = norm.cdf(z_stat)
 
     elif tail_type == 2:
-        # RIGHT-TAILED
+        # Right
         z_crit = norm.ppf(1 - alpha)
         crit_str = f"$z_c = {format_val(z_crit)}$"
         p_value = 1 - norm.cdf(z_stat)
 
     else:
-        # TWO-TAILED (tail_type == 3)
+        # Both tails
         z_crit_val = norm.ppf(1 - alpha / 2)
         crit_str = f"$z_c = \\pm\\,{format_val(z_crit_val)}$"
         p_value = 2 * (1 - norm.cdf(abs(z_stat)))
@@ -619,30 +578,26 @@ def two_dependent_z_test(n, sigma_d, d_bar, alpha, tail_type=1):
 # 5) Two-Dependent-Sample T-Test (Paired T)
 ##############################################################################
 def two_dependent_t_test(n, s_d, d_bar, alpha, tail_type=1):
-    """
-    Two-dependent-sample T-test (paired).
-    Returns figure, does NOT show/save automatically.
-    """
     from scipy.stats import t
 
     df = n - 1
     t_stat = d_bar / (s_d / (n**0.5))
 
-    # Decide critical value(s) and p-value
+    
     if tail_type == 1:
-        # LEFT-TAILED
+        # Left
         t_crit = t.ppf(alpha, df)
         crit_str = f"$t_c = {format_val(t_crit)}$"
         p_value = t.cdf(t_stat, df)
 
     elif tail_type == 2:
-        # RIGHT-TAILED
+        # Right
         t_crit = t.ppf(1 - alpha, df)
         crit_str = f"$t_c = {format_val(t_crit)}$"
         p_value = 1 - t.cdf(t_stat, df)
 
     else:
-        # TWO-TAILED (tail_type == 3)
+        # Both tails
         t_crit_val = t.ppf(1 - alpha / 2, df)
         crit_str = f"$t_c = \\pm\\,{format_val(t_crit_val)}$"
         p_value = 2 * (1 - t.cdf(abs(t_stat), df))
@@ -676,49 +631,35 @@ def two_dependent_t_test(n, s_d, d_bar, alpha, tail_type=1):
 # 6) Two-Dependent-Sample Proportion Test (McNemar)
 ##############################################################################
 def two_dependent_proportion_test(n10, n01, n11, n00, alpha, tail_type=2):
-    """
-    Two-dependent-sample proportion test, e.g. McNemar’s approximation.
-    Supports 3 tail types:
-      1 => Left-tailed (H₁: Δp < 0)
-      2 => Right-tailed (H₁: Δp > 0)
-      3 => Two-tailed (H₁: Δp ≠ 0)
-
-    Returns figure, does NOT show/save automatically.
-    """
     from scipy.stats import norm
 
-    # rename b, c for clarity in the formula
     b = n10
     c = n01
     
-    # continuity-corrected numerator
     numerator = abs(b - c) - 1
     if numerator < 0:
         numerator = 0
 
-    # compute z_stat for McNemar’s approximation
     z_stat = numerator / ((b + c + 1e-15)**0.5)
 
-    # Decide critical value(s), p-value, and text for info box, based on tail_type
     if tail_type == 1:
-        # LEFT-TAILED (H₁: Δp < 0)
+        # Left (H₁: Δp < 0)
         z_crit = norm.ppf(alpha)
         crit_str = f"$z_c = {format_val(z_crit)}$"
         p_value = norm.cdf(z_stat)
 
     elif tail_type == 2:
-        # RIGHT-TAILED (H₁: Δp > 0)
+        # Right (H₁: Δp > 0)
         z_crit = norm.ppf(1 - alpha)
         crit_str = f"$z_c = {format_val(z_crit)}$"
         p_value = 1 - norm.cdf(z_stat)
 
     else:
-        # TWO-TAILED (H₁: Δp ≠ 0)
+        # Both (H₁: Δp ≠ 0)
         z_crit_val = norm.ppf(1 - alpha/2)
         crit_str = f"$z_c = \\pm\\,{format_val(z_crit_val)}$"
         p_value = 2 * (1 - norm.cdf(abs(z_stat)))
 
-    # Build info box text
     info_text = (
         f"$n_{{10}} = {n10}$\n\n"
         f"$n_{{01}} = {n01}$\n\n"
@@ -731,7 +672,6 @@ def two_dependent_proportion_test(n10, n01, n11, n00, alpha, tail_type=2):
         "$z = \\frac{|b-c|-1}{\\sqrt{b + c}}$"
     )
 
-    # Create figure and plot
     fig, ax_info, ax_graph = create_figure_with_info_box(info_text)
     plot_test_distribution(
         ax_graph=ax_graph,
@@ -751,10 +691,6 @@ def two_dependent_proportion_test(n10, n01, n11, n00, alpha, tail_type=2):
 # 7) Two-Independent-Sample Z-Test (sigma1, sigma2 known)
 ##############################################################################
 def two_independent_z_test(n1, n2, sigma1, sigma2, x_bar1, x_bar2, alpha, tail_type=1):
-    """
-    Two-independent-sample Z-test, difference in means=0, known sigma1, sigma2.
-    Returns figure, does NOT show/save automatically.
-    """
     from scipy.stats import norm
 
     diff = x_bar1 - x_bar2
@@ -762,19 +698,19 @@ def two_independent_z_test(n1, n2, sigma1, sigma2, x_bar1, x_bar2, alpha, tail_t
     z_stat = diff / se
 
     if tail_type == 1:
-        # LEFT-TAILED
+        # Left
         z_crit = norm.ppf(alpha)
         crit_str = f"$z_c = {format_val(z_crit)}$"
         p_value = norm.cdf(z_stat)
 
     elif tail_type == 2:
-        # RIGHT-TAILED
+        # Right
         z_crit = norm.ppf(1 - alpha)
         crit_str = f"$z_c = {format_val(z_crit)}$"
         p_value = 1 - norm.cdf(z_stat)
 
     else:
-        # TWO-TAILED (tail_type == 3)
+        # Both tails
         z_crit_val = norm.ppf(1 - alpha / 2)
         crit_str = f"$z_c = \\pm\\,{format_val(z_crit_val)}$"
         p_value = 2 * (1 - norm.cdf(abs(z_stat)))
@@ -810,17 +746,6 @@ def two_independent_z_test(n1, n2, sigma1, sigma2, x_bar1, x_bar2, alpha, tail_t
 # 8) Two-Independent-Sample T-Test (Welch)
 ##############################################################################
 def two_independent_t_test(n1, n2, s1, s2, x_bar1, x_bar2, alpha, tail_type=1):
-    """
-    Welch's two-independent-sample T-test (no pooled variance).
-    
-    H₀: (μ₁ - μ₂) = 0
-    H₁ depends on tail_type:
-      1 => (μ₁ - μ₂) < 0   (left-tailed)
-      2 => (μ₁ - μ₂) > 0   (right-tailed)
-      3 => (μ₁ - μ₂) ≠ 0   (two-tailed)
-    
-    Returns figure, does NOT show/save automatically.
-    """
     from scipy.stats import t
 
     # Compute the difference in sample means
@@ -843,13 +768,13 @@ def two_independent_t_test(n1, n2, s1, s2, x_bar1, x_bar2, alpha, tail_type=1):
 
     # Decide critical values and p-value based on tail_type
     if tail_type == 1:
-        # LEFT-TAILED (H₁: μ₁ - μ₂ < 0)
+        # Left (H₁: μ₁ - μ₂ < 0)
         t_crit = t.ppf(alpha, df_welch)
         crit_str = f"$t_c = {format_val(t_crit)}$"
         p_value = t.cdf(t_stat, df_welch)
 
     elif tail_type == 2:
-        # RIGHT-TAILED (H₁: μ₁ - μ₂ > 0)
+        # Right (H₁: μ₁ - μ₂ > 0)
         t_crit = t.ppf(1 - alpha, df_welch)
         crit_str = f"$t_c = {format_val(t_crit)}$"
         p_value = 1 - t.cdf(t_stat, df_welch)
@@ -894,10 +819,6 @@ def two_independent_t_test(n1, n2, s1, s2, x_bar1, x_bar2, alpha, tail_type=1):
 # 9) Two-Independent-Sample Proportion Z-Test
 ##############################################################################
 def two_independent_proportion_z_test(x1, x2, n1, n2, alpha, tail_type=1):
-    """
-    Two-independent-sample proportion z-test, difference in p1-p2=0
-    Returns figure, does NOT show/save automatically.
-    """
     from scipy.stats import norm
 
     p1_hat = x1/n1
@@ -910,19 +831,19 @@ def two_independent_proportion_z_test(x1, x2, n1, n2, alpha, tail_type=1):
     z_stat = diff / se
 
     if tail_type == 1:
-        # LEFT-TAILED
+        # Left
         z_crit = norm.ppf(alpha)
         crit_str = f"$z_c = {format_val(z_crit)}$"
         p_value = norm.cdf(z_stat)
 
     elif tail_type == 2:
-        # RIGHT-TAILED
+        # Right
         z_crit = norm.ppf(1 - alpha)
         crit_str = f"$z_c = {format_val(z_crit)}$"
         p_value = 1 - norm.cdf(z_stat)
 
     else:
-        # TWO-TAILED (tail_type == 3)
+        # Both tails
         z_crit_val = norm.ppf(1 - alpha / 2)
         crit_str = f"$z_c = \\pm\\,{format_val(z_crit_val)}$"
         p_value = 2 * (1 - norm.cdf(abs(z_stat)))
@@ -1041,11 +962,9 @@ def chi_square_homogeneity_test(observed_table, alpha):
 
 
 def show_figure(fig):
-    """Explicitly show the figure on screen."""
     plt.show()
 
 def save_figure(fig, filename="my_figure.png"):
-    """Save the figure to a file with tight layout."""
     fig.savefig(filename, bbox_inches='tight')
 
 def _wrap_test_function(func):

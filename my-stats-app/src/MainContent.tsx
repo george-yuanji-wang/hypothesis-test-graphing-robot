@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/card"
 import { initPyodide } from "./pyodideLoader"
 
-// Import your form components:
+
 import OneSampleTForm from "./components/forms/OneSampleTForm"
 import OneSampleZForm from "./components/forms/OneSampleZForm"
 import OneSampleProportionZForm from "./components/forms/OneSampleProportionZForm"
@@ -254,7 +254,7 @@ export default function MainContent() {
         <h2 className="text-3xl font-bold mb-4">Updates:</h2>
         <div className="text-sm">
           <div className="py-2">
-            <span className="font-semibold">April 26, 2025</span> - Added support for the Chi-Square Homogeneity test and the Chi-Square.
+            <span className="font-semibold">April 26, 2025</span> - Added support for the Chi-Square Homogeneity test and the Chi-Square. Changed Colors.
           </div>
           <div className="py-2">
             <span className="font-semibold">April 22, 2025</span> - Added support for the Chi-Square Goodness of Fit test and the Chi-Square Independence Test. Fixed minor bugs.

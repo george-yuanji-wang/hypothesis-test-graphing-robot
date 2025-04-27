@@ -1,7 +1,6 @@
 import os, textwrap, pandas as pd, matplotlib.pyplot as plt
 from scipy.stats import linregress
 
-# ---------- file paths and titles ----------
 datasets = {
     'students': (
         'public/students.csv',
@@ -17,7 +16,6 @@ datasets = {
     )
 }
 
-# ---------- columns and labels ----------
 heat_cols = [
     'Q16: rate diet',
     'Q15: rate exercise',
@@ -32,13 +30,13 @@ labels = {
 }
 
 comparisons = [
-    ('Q16: rate diet',     'Q15: rate exercise'),     # diet ↔ exercise
-    ('Q17: rate sleep',    'Q15: rate exercise'),     # sleep ↔ exercise
-    ('Q15: rate exercise', 'Q18: rate healthiness')   # exercise ↔ health
+    ('Q16: rate diet',     'Q15: rate exercise'),     
+    ('Q17: rate sleep',    'Q15: rate exercise'),    
+    ('Q15: rate exercise', 'Q18: rate healthiness')  
 ]
 
 point_colour = {
-    ('Q16: rate diet','Q15: rate exercise'):          '#C23B21',  # red-orange
+    ('Q16: rate diet','Q15: rate exercise'):          '#C23B21',  # red
     ('Q17: rate sleep','Q15: rate exercise'):         '#2E5895',  # blue
     ('Q15: rate exercise','Q18: rate healthiness'):   '#4C9F38'   # green
 }
@@ -48,7 +46,6 @@ line_colour = {
     ('Q15: rate exercise','Q18: rate healthiness'):   '#3E7C2F'
 }
 
-# ---------- misc columns to drop ----------
 drop_t = ['Q17t: Q1 other','Q27t: others','Q37t: other']
 q2 = ['Q2: asthma ppl','Q2: cancer ppl','Q2: diabetes ppl',
       'Q2: heart disease ppl','Q2: high blood pressure ppl','Q2: none','Q2: others']
@@ -64,7 +61,6 @@ for key, (csv_path, title) in datasets.items():
     df['Q3_sum'] = df[q3].sum(axis=1)
     df.drop(columns=q2+q3, inplace=True, errors='ignore')
 
-    # ---------- 4×4 Pearson correlation matrix ----------
     sub = df[heat_cols].apply(pd.to_numeric, errors='coerce').dropna()
     corr = sub.corr(method='pearson')
 
@@ -85,7 +81,6 @@ for key, (csv_path, title) in datasets.items():
     fig.savefig(f'plots/{key}/{key}_4x4_corr.png', bbox_inches='tight', dpi=300)
     plt.close(fig)
 
-    # ---------- three-panel scatter comparisons ----------
     fig, axes = plt.subplots(1, 3, figsize=(18,4), dpi=300)
     for ax, (xcol, ycol) in zip(axes, comparisons):
         xy = df[[xcol, ycol]].apply(pd.to_numeric, errors='coerce').dropna()
@@ -110,7 +105,6 @@ for key, (csv_path, title) in datasets.items():
                 bbox_inches='tight', dpi=300)
     plt.close(fig)
 
-# --- build one figure that holds all three 4×4 matrices --------------------
 corr_mats = {}
 for key, (csv_path, _) in datasets.items():
     df_tmp = pd.read_csv(csv_path)
